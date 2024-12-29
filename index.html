@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Trek Timelines Fleet Leaderboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: "Arial", sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+                url('https://raw.githubusercontent.com/BigBird7827/STT-Fleet-Leaders/refs/heads/main/Enterprise%20for%20Background.png') no-repeat center center fixed;
+            background-size: cover;
+            color: #E0E0E0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 90%;
+            margin: 8px auto 0;
+            text-align: center;
+            padding: 30px 20px;
+            background: #0D1B2A;
+            border: 2px solid #C9A227;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            color: #E0E0E0;
+            font-size: 20pt;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            line-height: 1.6;
+            text-shadow: 1px 1px 5px #000000;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        h1 {
+            margin-bottom: 8px;
+            font-family: 'Orbitron', sans-serif;
+            color: #C9A227;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+            font-size: 24pt;
+            line-height: 1.4;
+            letter-spacing: 2px;
+        }
+
+        #last-update {
+            font-size: 15pt;
+            color: #FFFFFF;
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        .data-container {
+            width: 90%;
+            margin: 20px auto;
+            text-align: center;
+            padding: 20px;
+            background: rgba(22, 33, 62, 0.25);
+            border: 2px solid #C9A227;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
+            color: #E0E0E0;
+            font-size: 16pt;
+            font-weight: 500;
+            line-height: 1.5;
+            text-shadow: 1px 1px 4px #000000;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        thead {
+            background-color: rgba(22, 33, 62, 0.25);
+            color: #C9A227;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border: 1px solid #C9A227;
+            text-align: center;
+            font-size: 14pt;
+            white-space: nowrap;
+            background-color: rgba(26, 26, 46, 0.25);
+        }
+
+        th:nth-child(1) {
+            width: 45%;
+        }
+
+        th:nth-child(2) {
+            width: 20%;
+        }
+
+        th:nth-child(3) {
+            width: 35%;
+        }
+
+        tbody tr:nth-child(odd) {
+            background-color: rgba(26, 26, 46, 0.25);
+            color: #E0E0E0;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: rgba(22, 33, 62, 0.25);
+            color: #E0E0E0;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: 2px solid #C9A227;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                font-size: 16pt;
+                padding: 15px;
+            }
+
+            .data-container {
+                font-size: 14pt;
+                padding: 15px;
+            }
+
+            table {
+                font-size: 12pt;
+            }
+
+            th,
+            td {
+                padding: 8px;
+                font-size: 12pt;
+            }
+
+            h1 {
+                font-size: 20pt;
+                word-wrap: break-word;
+            }
+        }
+
+        @media (max-width: 480px) {
+            th,
+            td {
+                font-size: 10pt;
+                padding: 6px;
+                white-space: nowrap;
+            }
+
+            h1 {
+                font-size: 18pt;
+                word-wrap: break-word;
+            }
+
+            .container {
+                font-size: 14pt;
+                padding: 10px;
+            }
+
+            .data-container {
+                font-size: 12pt;
+                padding: 10px;
+            }
+
+            #last-update {
+                text-align: center;
+                font-size: 14pt;
+                line-height: 1.5;
+                display: block;
+            }
+
+            #last-update::before {
+                content: "Last Updated";
+                display: block;
+                margin-bottom: 5px;
+                font-weight: bold;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Star Trek Timelines Fleet Leaderboard</h1>
+        <div id="last-update">Last Updated: N/A</div>
+    </div>
+    <div class="data-container">
+        <table id="leaderboard">
+            <thead>
+                <tr>
+                    <th>Fleet</th>
+                    <th>Rank</th>
+                    <th>VP</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <script>
+        async function fetchLeaderboardData() {
+            const url = "https://raw.githubusercontent.com/BigBird7827/STT-Fleet-Leaders/refs/heads/main/Data/fleet_leaderboard.json";
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                populateTable(data.fleets);
+            } catch (error) {
+                console.error("Failed to fetch leaderboard data:", error);
+            }
+        }
+
+        function populateTable(fleets) {
+            const tableBody = document.querySelector("#leaderboard tbody");
+            tableBody.innerHTML = "";
+            fleets.forEach(fleet => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${fleet.fleet}</td>
+                    <td>${fleet.rank}</td>
+                    <td>${fleet.vp.toLocaleString()}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function updateLastRefreshTime() {
+            const now = new Date();
+            const lastUpdateElement = document.getElementById("last-update");
+
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+
+            lastUpdateElement.textContent = `Last Updated: ${month}/${day}/${year} @ ${hours}:${minutes}`;
+        }
+
+        function isUpdateAllowed() {
+            const now = new Date();
+            const day = now.getDay();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+
+            return (
+                (day === 4 && (hours > 9 || (hours === 9 && minutes >= 2))) ||
+                (day > 4 || day === 0) ||
+                (day === 1 && hours < 9)
+            );
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (isUpdateAllowed()) {
+                updateLastRefreshTime();
+                fetchLeaderboardData();
+                setInterval(() => {
+                    if (isUpdateAllowed()) {
+                        updateLastRefreshTime();
+                        fetchLeaderboardData();
+                    }
+                }, 120000);
+            }
+        });
+    </script>
+</body>
+</html>
