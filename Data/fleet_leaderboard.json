@@ -1,0 +1,54 @@
+{
+    "fleets": [
+        {
+            "fleet": "[SSR] Second Star to the Right",
+            "rank": 1,
+            "vp": 15221798
+        },
+        {
+            "fleet": "=j= Space Junkies",
+            "rank": 2,
+            "vp": 14509132
+        },
+        {
+            "fleet": "Suncoast",
+            "rank": 3,
+            "vp": 13998827
+        },
+        {
+            "fleet": "Mirror Space Junkies",
+            "rank": 4,
+            "vp": 12121004
+        },
+        {
+            "fleet": "{DD} D3vil Dog5",
+            "rank": 5,
+            "vp": 11502768
+        },
+        {
+            "fleet": "Phu Tang Clan",
+            "rank": 6,
+            "vp": 11087432
+        },
+        {
+            "fleet": "Battleship Yamato",
+            "rank": 7,
+            "vp": 10725002
+        },
+        {
+            "fleet": "Battleship Nagato",
+            "rank": 8,
+            "vp": 10314572
+        },
+        {
+            "fleet": "ST Fleet University",
+            "rank": 9,
+            "vp": 9876921
+        },
+        {
+            "fleet": "TLA (The Liberal Alliance)",
+            "rank": 10,
+            "vp": 9100003
+        }
+    ]
+}
