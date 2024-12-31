@@ -156,108 +156,6 @@
             text-align: center;
             text-shadow: 1px 1px 4px #000000;
         }
-
-        @media (max-width: 768px) {
-            .data-container {
-                margin: 270px auto 0;
-            }
-
-            th,
-            td {
-                font-size: 12pt;
-                padding: 10px;
-            }
-
-            h1 {
-                font-size: 20pt;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                flex-direction: column;
-                align-items: center;
-                padding: 15px;
-                min-height: auto;
-                width: 100%;
-                margin-right: -3px;
-            }
-
-            #event-image-container {
-                width: 60%;
-                margin-bottom: 15px;
-            }
-
-            #event-image {
-                width: 100%;
-                border-radius: 10px;
-            }
-
-            h1 {
-                font-size: 18pt;
-                text-align: center;
-                margin-top: 10px;
-            }
-
-            #last-update-container {
-                margin-top: 10px;
-                font-size: 14pt;
-                text-align: center;
-            }
-
-            .data-container {
-                margin: 290px auto 0;
-            }
-
-            th,
-            td {
-                font-size: 10pt;
-                padding: 8px;
-            }
-        }
-
-        @media (max-width: 360px) {
-            .container {
-                flex-direction: column;
-                align-items: center;
-                padding: 10px;
-                min-height: auto;
-                width: 100%;
-                margin-right: -3px;
-            }
-
-            #event-image-container {
-                width: 70%;
-                margin-bottom: 15px;
-            }
-
-            #event-image {
-                width: 100%;
-                border-radius: 10px;
-            }
-
-            h1 {
-                font-size: 16pt;
-                text-align: center;
-                margin-top: 10px;
-            }
-
-            #last-update-container {
-                margin-top: 10px;
-                font-size: 12pt;
-                text-align: center;
-            }
-
-            .data-container {
-                margin: 300px auto 0;
-            }
-
-            th,
-            td {
-                font-size: 9pt;
-                padding: 6px;
-            }
-        }
     </style>
 </head>
 <body>
@@ -293,45 +191,39 @@
             return new Date(now.getTime() + utcOffset + pstOffset);
         }
 
-        function isUpdateAllowed() {
-            const pstNow = getPSTTime();
-            const day = pstNow.getDay();
-            const hours = pstNow.getHours();
-            const minutes = pstNow.getMinutes();
-            return (
-                (day === 4 && (hours > 9 || (hours === 9 && minutes >= 2))) ||
-                (day > 4 && day < 1) ||
-                (day === 0 || (day === 1 && hours < 9))
-            );
-        }
-
-        function updateLastRefreshTime() {
-            const pstNow = getPSTTime();
-            const lastUpdateElement = document.getElementById("last-update");
-            const day = String(pstNow.getDate()).padStart(2, '0');
-            const month = String(pstNow.getMonth() + 1).padStart(2, '0');
-            const year = pstNow.getFullYear();
-            const hours = String(pstNow.getHours()).padStart(2, '0');
-            const minutes = String(pstNow.getMinutes()).padStart(2, '0');
-            lastUpdateElement.textContent = `${month}/${day}/${year} @ ${hours}:${minutes}`;
-        }
-
         async function fetchEventData() {
-            const url = "https://raw.githubusercontent.com/BigBird7827/STT-Fleet-Leaders/main/Data/Event%20Data.json";
+            const url = "https://raw.githubusercontent.com/BigBird7827/STT-Fleet-Leaders/refs/heads/main/Data/Event%20Data.json";
             try {
                 const response = await fetch(url);
                 const events = await response.json();
                 const currentDate = getPSTTime();
-                const activeEvent = events.find(event => {
+
+                let activeEvent = null;
+                let mostRecentEvent = null;
+
+                events.forEach(event => {
                     const [startDate, endDate] = event["Event Date"].split(" to ").map(date => new Date(date));
-                    return currentDate >= startDate && currentDate <= endDate;
+                    if (currentDate >= startDate && currentDate <= endDate) {
+                        activeEvent = event;
+                    }
+                    if (currentDate > endDate) {
+                        if (
+                            !mostRecentEvent ||
+                            new Date(mostRecentEvent["Event Date"].split(" to ")[1]) < endDate
+                        ) {
+                            mostRecentEvent = event;
+                        }
+                    }
                 });
 
                 if (activeEvent) {
                     document.getElementById("event-image").src = activeEvent["Event Image"];
                     document.getElementById("event-name").textContent = activeEvent["Event Name"];
+                } else if (mostRecentEvent) {
+                    document.getElementById("event-image").src = mostRecentEvent["Event Image"];
+                    document.getElementById("event-name").textContent = mostRecentEvent["Event Name"];
                 } else {
-                    document.getElementById("event-name").textContent = "No Current Event";
+                    document.getElementById("event-name").textContent = "No Current Event or Recent Events";
                 }
             } catch (error) {
                 console.error("Failed to fetch event data:", error);
@@ -363,17 +255,22 @@
             });
         }
 
+        function updateLastRefreshTime() {
+            const pstNow = getPSTTime();
+            const lastUpdateElement = document.getElementById("last-update");
+            const day = String(pstNow.getDate()).padStart(2, '0');
+            const month = String(pstNow.getMonth() + 1).padStart(2, '0');
+            const year = pstNow.getFullYear();
+            const hours = String(pstNow.getHours()).padStart(2, '0');
+            const minutes = String(pstNow.getMinutes()).padStart(2, '0');
+            lastUpdateElement.textContent = `${month}/${day}/${year} @ ${hours}:${minutes}`;
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             updateLastRefreshTime();
             fetchEventData();
             fetchLeaderboardData();
-            if (isUpdateAllowed()) {
-                setInterval(() => {
-                    if (isUpdateAllowed()) {
-                        updateLastRefreshTime();
-                    }
-                }, 120000);
-            }
+            setInterval(updateLastRefreshTime, 120000);
         });
     </script>
 </body>
